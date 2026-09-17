@@ -1,0 +1,89 @@
+# Lead Discovery & Decision-Maker Pipeline Configuration
+# Configure your target ICP, discovery queries, roles, and filtering rules below.
+
+# Structured Company Targeting (templates into natural-language Exa search)
+target_company:
+  industry: ""              # e.g. "vertical SaaS"
+  problem_solved: ""        # e.g. "manages field service and claims processing operations"
+  company_stage: ""         # e.g. "early-stage, funded"
+  customer_type: ""         # e.g. "B2B enterprise"
+  raw_query: ""             # optional — if set, overrides the templated query entirely
+
+# Example configuration:
+# target_company:
+#   industry: "vertical SaaS"
+#   problem_solved: "manages field service and claims processing operations"
+#   company_stage: "early-stage, funded"
+#   customer_type: "B2B enterprise"
+#   raw_query: ""
+
+# Stage 1: Discovery (Exa Semantic Search & Lookalike Finding)
+discovery:
+  enabled: true
+  call_cap: 10
+  num_results_per_query: 10
+  # Semantic search queries for discovering companies matching your domain
+  queries:
+    - "B2B software platforms with customer operations workflows and API integrations"
+  # Seed URLs for finding structurally similar companies (Exa findSimilar)
+  seed_urls:
+    - "https://example.com"
+
+# Stage 2: Web Scraping & Context Enrichment (Firecrawl)
+enrichment:
+  enabled: true
+  timeout_seconds: 30.0
+  max_content_length: 15000
+  scrape_about_page: true
+  about_path_keywords:
+    - "about"
+    - "team"
+    - "leadership"
+    - "company"
+
+# Stage 3: Decision-Maker Identification (Tavily)
+decision_maker:
+  enabled: true
+  # Configurable target roles and titles to search and extract
+  target_roles:
+    - "Head of Growth"
+    - "VP of Marketing"
+    - "Founder"
+    - "CEO"
+  max_search_results: 5
+  search_depth: "basic"
+
+# Stage 4: ICP Classification & Scoring (NVIDIA NIM)
+classification:
+  enabled: true
+  model: "meta/llama-3.2-11b-vision-instruct"
+  temperature: 0.0
+  # Arbitrary ICP criteria passed dynamically to the LLM evaluator
+  icp_criteria:
+    - "Company provides a B2B SaaS or technology platform"
+    - "Company is an early-to-mid stage growth company (roughly 10-150 headcount)"
+    - "Demonstrated commercial traction or institutional funding"
+    - "Has workflow, API, or automated capabilities in product"
+  min_fit_score: 0.7
+
+# Mechanical Hard Filters
+filters:
+  min_employees: 10
+  max_employees: 150
+  allowed_funding_stages:
+    - "seed"
+    - "series a"
+    - "series b"
+    - "bootstrapped"
+  allowed_countries:
+    - "US"
+    - "United States"
+    - "USA"
+  reject_foreign_cctld: true
+
+# Storage and Output File Paths
+storage:
+  database_path: "data/leads.sqlite3"
+  raw_leads_path: "data/raw_leads.json"
+  enriched_leads_path: "data/enriched_leads.json"
+  final_output_csv: "data/qualified_leads.csv"
