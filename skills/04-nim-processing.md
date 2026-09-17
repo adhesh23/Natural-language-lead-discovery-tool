@@ -36,3 +36,4 @@ classification:
 - **Thin / Missing Content**: Immediately detects context under 60 characters and returns `INSUFFICIENT_CONTEXT_FLAG` without making costly LLM calls or hallucinating facts.
 - **JSON Parsing Errors**: Robust extraction handles markdown fences (````json ... ````) and cleans trailing characters. If parsing fails, logs warning and returns a zero score rather than crashing.
 - **API Limits & Timeouts**: Retries or key rotation on network/quota errors; pipeline safely skips unscoreable records without losing previously processed items.
+- **NIM Scoring Failure Behavior**: *(Known current behavior)* An upstream NIM API failure (e.g. HTTP 500 or timeout) during scoring currently causes automatic disqualification (`is_qualified=False`, `fit_score=0.0`) with the error recorded in `reasoning`, rather than being flagged as a distinct third state (e.g., `scoring_error`).
